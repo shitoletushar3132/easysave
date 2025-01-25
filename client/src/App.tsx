@@ -1,15 +1,25 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Main from "./pages/Main";
+import "./App.css";
+import { lazy, Suspense } from "react";
+import { Body } from "./pages/Body";
+
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
 
 function App() {
   return (
     <>
       <BrowserRouter basename="/">
-        <Routes>
-          <Route path="/" element={<Main />}>
-            <Route path="/dashboard" element={<div>helo</div>} />
-          </Route>
-        </Routes>
+        <Suspense
+          fallback={<span className="loading loading-ring loading-sm"></span>}
+        >
+          <Routes>
+            <Route path="/" element={<Body />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+            </Route>
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </>
   );
