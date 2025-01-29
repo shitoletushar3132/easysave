@@ -6,9 +6,12 @@ import { login } from "../requests/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import ButtonChange from "../components/ButtonChange";
+import { useSetRecoilState } from "recoil";
+import { authState } from "../store/atomAuth";
 
 const Login = () => {
   const Navigate = useNavigate();
+  const setProfile = useSetRecoilState(authState);
   const [formData, setFormData] = useState<LoginData>({
     emailId: "tushar@gmail.com",
     password: "@Tushar123",
@@ -25,6 +28,7 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       const response = await login(formData); // Pass the entire formData object
+      setProfile(response.user);
       toast.success(response.message); // Show success message
       Navigate("/");
     } catch (error: any) {
@@ -46,6 +50,7 @@ const Login = () => {
         />
 
         <Input
+          type="password"
           label="Password"
           placeholder="Enter your Password"
           onChange={handleInputChange}

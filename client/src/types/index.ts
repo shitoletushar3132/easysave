@@ -3,6 +3,7 @@ export type InputBox = {
   placeholder: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   name: string;
+  type?: string;
 };
 
 export type ButtonAtt = {

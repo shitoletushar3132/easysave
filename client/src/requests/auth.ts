@@ -7,7 +7,7 @@ const login = async ({ emailId, password }: LoginData) => {
     const response = await axios.post(
       `${BASEURL}/login`,
       {
-        emailId,
+        email: emailId,
         password,
       },
       { withCredentials: true }
@@ -33,7 +33,7 @@ const signup = async ({
       {
         firstName,
         lastName,
-        emailId,
+        email: emailId,
         password,
       },
       { withCredentials: true }
@@ -46,4 +46,30 @@ const signup = async ({
   }
 };
 
-export { login, signup };
+const fetchUserData = async () => {
+  try {
+    const user = await axios.get(`${BASEURL}/profile`, {
+      withCredentials: true,
+    });
+
+    return await user.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const logout = async () => {
+  try {
+    const response = await axios.get(`${BASEURL}/logout`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+const uploadFile = async () => {};
+
+const createFolder = async () => {};
+
+export { login, signup, uploadFile, createFolder, fetchUserData, logout };

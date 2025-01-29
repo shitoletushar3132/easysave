@@ -1,10 +1,28 @@
+import { NavLink, useNavigate } from "react-router-dom";
+import { useRecoilState } from "recoil";
+import { authState } from "../store/atomAuth";
+import { logout } from "../requests/auth";
+import { toast } from "react-toastify";
+
 const NavBar = () => {
+  const [profile, setProfile] = useRecoilState(authState);
+  const navigate = useNavigate();
+  const handleLogOut = async () => {
+    const response = await logout();
+    setProfile({ email: "", firstName: "", lastName: "", userId: "" });
+    navigate("/login");
+    toast.success(response.message);
+  };
   return (
     <div className="navbar bg-base-300 shadow-lg">
       <div className="flex-1">
-        <a className="btn btn-ghost text-xl">🧑‍💻 DEV MATCH</a>
+        <NavLink to={"/"} className="btn btn-ghost text-xl">
+          🧑‍💻 DEV MATCH
+        </NavLink>
       </div>
       <div className="flex-none gap-2">
+        {profile.userId && <h1> Welcome, {profile.firstName}</h1>}
+
         <div className="dropdown dropdown-end mx-5">
           <div
             tabIndex={0}
@@ -32,7 +50,7 @@ const NavBar = () => {
               <a>Settings</a>
             </li>
             <li>
-              <a>Logout</a>
+              <a onClick={() => handleLogOut()}>Logout</a>
             </li>
           </ul>
         </div>

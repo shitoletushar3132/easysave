@@ -1,15 +1,38 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
-import Footer from "../components/Footer";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import { useRecoilState } from "recoil";
+import { authState } from "../store/atomAuth";
+import { fetchUserData } from "../requests/auth";
+import { useEffect } from "react";
 
-export const Body = () => {
+const Body = () => {
+  const [profile, setProfile] = useRecoilState(authState);
+  const navigate = useNavigate();
+
+  const fetchData = async () => {
+    try {
+      const userData = await fetchUserData();
+      setProfile(userData.user);
+    } catch (error: any) {
+      toast.error(error.response.data);
+      navigate("/login");
+    }
+  };
+
+  useEffect(() => {
+    if (!profile.userId) {
+      fetchData();
+    }
+  }, []);
+
   return (
     <div>
       <ToastContainer />
       <NavBar />
       <Outlet />
-      <Footer />
     </div>
   );
 };
+
+export default Body;

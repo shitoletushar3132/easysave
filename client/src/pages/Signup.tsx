@@ -6,9 +6,12 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import ButtonChange from "../components/ButtonChange";
 import { signup } from "../requests/auth";
+import { useSetRecoilState } from "recoil";
+import { authState } from "../store/atomAuth";
 
 const Signup = () => {
   const Navigate = useNavigate();
+  const setProfile = useSetRecoilState(authState);
   const [formData, setFormData] = useState<InputBoxSignUp>({
     firstName: "",
     lastName: "",
@@ -27,9 +30,9 @@ const Signup = () => {
   const handleLogin = async () => {
     try {
       const response = await signup(formData); // Pass the entire formData object
-      toast.success(response); // Show success message\
-      toast.warn("Login To You Account");
-      Navigate("/login");
+      setProfile(response.user);
+      Navigate("/");
+      toast.success(response);
     } catch (error: any) {
       toast.error(error.response?.data || "Login failed!"); // Show error message
     }

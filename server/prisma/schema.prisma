@@ -14,6 +14,42 @@ datasource db {
 }
 
 model User {
-  userId Int    @id @default(autoincrement())
-  email  String @unique
+  userId    Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  files     File[]
+  folders   Folder[]
+}
+
+model File {
+  fileId    Int      @id @default(autoincrement())
+  name      String
+  type      String
+  key       String
+  size      Int
+  owner     User     @relation(fields: [ownerId], references: [userId])
+  ownerId   Int
+  status    Status // The status of the file (upload, pending, or error)
+  access    Boolean // Indicates whether the file has been uploaded successfully
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Folder {
+  folderId  String   @id @default(uuid())
+  name      String
+  ownerId   Int // Foreign key to User
+  path      String // Folder path in S3
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
+}
+
+// Enum for file status
+enum Status {
+  upload
+  pending
+  error
 }
