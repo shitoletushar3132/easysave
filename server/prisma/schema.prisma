@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -35,6 +32,8 @@ model File {
   access    Boolean // Indicates whether the file has been uploaded successfully
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  folder    Folder?  @relation(fields: [folderId], references: [folderId]) // A file belongs to one folder (optional)
+  folderId  String? // Folder ID reference (nullable)
 }
 
 model Folder {
@@ -43,8 +42,8 @@ model Folder {
   ownerId   Int // Foreign key to User
   path      String // Folder path in S3
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
+  user      User     @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
+  files     File[] // A folder can have multiple files
 }
 
 // Enum for file status

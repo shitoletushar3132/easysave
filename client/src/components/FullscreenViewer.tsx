@@ -27,11 +27,11 @@ const FullscreenViewer: React.FC<any> = ({
             Your browser does not support the video tag.
           </video>
         );
-      case "application":
+      case "document":
         return (
           <iframe
             src={file.url}
-            className="max-h-[85vh] max-w-full"
+            className="max-h-[85vh] max-w-full "
             title={file.name}
             frameBorder="0"
           />

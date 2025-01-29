@@ -24,7 +24,7 @@ const Body = () => {
     if (!profile.userId) {
       fetchData();
     }
-  }, []);
+  }, [setProfile]);
 
   return (
     <div>

@@ -2,9 +2,7 @@ import express, { Request, Response } from "express";
 import s3 from "../config/aws";
 import { userAuth } from "../middleware/auth";
 import Prisma from "../PrismaInit";
-import { PrismaClient, Status } from "@prisma/client";
 
-const prisma = new PrismaClient();
 const UploadRouter = express.Router();
 
 // Upload File
@@ -13,7 +11,7 @@ UploadRouter.post(
   userAuth,
   async (req: Request, res: Response): Promise<any> => {
     try {
-      const { fileName, fileType, fileSize } = req.body;
+      const { fileName, fileType, fileSize, folderName } = req.body;
       //@ts-expect-error
       const userId = req.user?.userId; // Ensure userId is available
 
@@ -23,11 +21,35 @@ UploadRouter.post(
           .json({ error: "fileName, fileType, and fileSize are required" });
       }
 
-      // Construct S3 Key
-      const s3Key = `${userId}/${fileName}`;
+      let s3Key;
+      let folderId: string | null = null;
+
+      if (folderName !== "" && folderName !== undefined) {
+        s3Key = `${userId}/${folderName}/${fileName}`;
+
+        // Check if the folder already exists
+        let existingFolder = await Prisma.folder.findFirst({
+          where: { name: folderName, ownerId: userId },
+        });
+
+        // If folder does not exist, create it
+        if (!existingFolder) {
+          existingFolder = await Prisma.folder.create({
+            data: {
+              name: folderName,
+              ownerId: userId,
+              path: `${userId}/${folderName}`,
+            },
+          });
+        }
+
+        folderId = existingFolder.folderId; // Store folder ID
+      } else {
+        s3Key = `${userId}/${fileName}`;
+      }
 
       // Store metadata in the database
-      const newFile = await prisma.file.create({
+      const newFile = await Prisma.file.create({
         data: {
           name: fileName,
           type: fileType,
@@ -35,7 +57,8 @@ UploadRouter.post(
           size: fileSize,
           ownerId: userId,
           access: false,
-          status: Status.pending,
+          status: "pending",
+          folderId, // Link file to folder if folder exists
         },
       });
 
@@ -74,9 +97,9 @@ UploadRouter.post(
           .json({ error: "fileId and status are required" });
       }
 
-      await prisma.file.update({
+      await Prisma.file.update({
         where: { fileId },
-        data: { status: Status.upload },
+        data: { status: "upload" },
       });
 
       res.status(200).json({ message: "File metadata updated successfully" });
@@ -113,7 +136,7 @@ UploadRouter.post(
       await s3.putObject(params).promise();
 
       // Save folder details in database
-      const newFolder = await prisma.folder.create({
+      const newFolder = await Prisma.folder.create({
         data: {
           name: folderName,
           ownerId: userId,

@@ -20,6 +20,33 @@ const SecondHeader = () => {
     }
   }, [location.pathname]);
 
+  // Define a function to categorize file types based on extension or MIME type
+  const categorizeFileType = (fileType: string): string => {
+    const imageTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "image/gif",
+      "image/webp",
+    ];
+    const audioTypes = ["audio/mp3", "audio/wav", "audio/ogg"];
+    const videoTypes = ["video/mp4", "video/webm", "video/ogg"];
+    const documentTypes = ["application/pdf"];
+
+    // Check and categorize based on MIME type
+    if (imageTypes.includes(fileType)) {
+      return "image";
+    } else if (audioTypes.includes(fileType)) {
+      return "audio";
+    } else if (videoTypes.includes(fileType)) {
+      return "video";
+    } else if (documentTypes.includes(fileType)) {
+      return "document";
+    } else {
+      return "other"; // Fallback for unknown types
+    }
+  };
+
   const uploadImage = async (file: File): Promise<void> => {
     try {
       // Step 1: Get the pre-signed URL from the server
@@ -31,8 +58,9 @@ const SecondHeader = () => {
         credentials: "include",
         body: JSON.stringify({
           fileName: file.name,
-          fileType: file.type,
+          fileType: categorizeFileType(file.type),
           fileSize: file.size,
+          folderName: location.pathname.split("/")[2],
         }),
       });
 
@@ -76,7 +104,7 @@ const SecondHeader = () => {
 
         // console.log(uploadResponse);
       } else {
-        const notifyResponse = await fetch("/file-uploaded", {
+        await fetch("/file-uploaded", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -86,7 +114,6 @@ const SecondHeader = () => {
             status: "error",
           }),
         });
-        console.log(notifyResponse);
         setStatus("Upload failed.");
         toast.info("Fail to Upload File Try Again");
         setStatus("");
@@ -115,7 +142,6 @@ const SecondHeader = () => {
         setStatus("Uploading...Do Not Referesh");
         uploadImage(file);
       }
-      console.log("Selected file:", file);
       // Reset the input
       event.target.value = "";
     }
@@ -123,6 +149,7 @@ const SecondHeader = () => {
 
   const handleFolderCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowFolderModal(false);
     if (folderName === "") {
       toast.warn("Enter a Vaild Name");
     }

@@ -25,6 +25,7 @@ const Dashboard = () => {
         credentials: "include",
       });
       const data = await response.json();
+
       setFolders(data);
     };
 
@@ -81,12 +82,13 @@ const Dashboard = () => {
             Your browser does not support the video tag.
           </video>
         );
-      case "application":
+      case "document":
         return (
-          <div className="w-full h-full flex justify-center items-center">
-            <FileText size={40} className="text-gray-400" />
-            <span className="text-gray-500">PDF Preview</span>
-          </div>
+          <iframe
+            src={file.url}
+            className="h-full w-full overflow-hidden"
+            title={file.name}
+          />
         );
       default:
         return (
@@ -142,8 +144,8 @@ const Dashboard = () => {
                 </div>
                 <div className="p-3">
                   <div className="flex items-center space-x-2">
-                    <FileImage size={16} className="text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700 truncate">
+                    <FileImage size={16} className="text-white-400" />
+                    <span className="text-sm font-medium text-white truncate">
                       {file.name}
                     </span>
                   </div>

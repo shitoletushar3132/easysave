@@ -1,16 +1,32 @@
 import { Link, useParams } from "react-router-dom";
 import SecondHeader from "./SecondHeader";
-import { FileImage } from "lucide-react";
+import { FileImage, FileText } from "lucide-react";
 import FullscreenViewer from "../components/FullscreenViewer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BASEURL } from "../helper/constant";
 
 const Folder = () => {
-  const files = Array.from({ length: 20 }, (_, index) => ({
+  const { folderName } = useParams();
+  const [files, setFiles] = useState<any[]>([]);
+  const files2 = Array.from({ length: 20 }, (_, index) => ({
     id: index,
     name: `Image ${index + 1}`,
     url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s",
     type: "image/jpg",
   }));
+
+  const fetchFolderFiles = async () => {
+    const response = await fetch(`${BASEURL}/folder-content/${folderName}`, {
+      credentials: "include",
+    });
+    const data = await response.json();
+
+    setFiles(data);
+  };
+
+  useEffect(() => {
+    fetchFolderFiles();
+  }, []);
 
   const [selectedFile, setSelectedFile] = useState<{
     id: number;
@@ -39,7 +55,41 @@ const Folder = () => {
     }
   };
 
-  const { folderName } = useParams();
+  // Function to render file previews based on the file type
+  const renderPreview = (file: any) => {
+    switch (file.type.split("/")[0]) {
+      case "image":
+        return (
+          <img
+            src={file.url}
+            alt={file.name}
+            className="w-full h-full object-cover"
+          />
+        );
+      case "video":
+        return (
+          <video controls className="w-full h-full">
+            <source src={file.url} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        );
+      case "document":
+        return (
+          <iframe
+            src={file.url}
+            className="h-full w-full overflow-hidden"
+            title={file.name}
+          />
+        );
+      default:
+        return (
+          <div className="w-full h-full flex justify-center items-center">
+            <FileImage size={40} className="text-gray-400" />
+            <span className="text-gray-500">Click To open</span>
+          </div>
+        );
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -59,22 +109,18 @@ const Folder = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 overflow-y-auto">
           {files.map((file, index) => (
             <div
-              key={file.id}
+              key={index}
               className="group relative cursor-pointer m-1"
               onClick={() => handleFileClick(file, index)}
             >
               <div className="flex flex-col rounded-lg bg-base-300 border border-base-200 overflow-hidden hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out ">
                 <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
-                  <img
-                    src={file.url}
-                    alt={file.name}
-                    className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                  />
+                  {renderPreview(file)} {/* Conditional rendering of preview */}
                 </div>
                 <div className="p-3">
                   <div className="flex items-center space-x-2">
                     <FileImage size={16} className="text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700 truncate">
+                    <span className="text-sm font-medium text-white truncate">
                       {file.name}
                     </span>
                   </div>

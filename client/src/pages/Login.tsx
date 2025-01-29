@@ -32,7 +32,6 @@ const Login = () => {
       toast.success(response.message); // Show success message
       Navigate("/");
     } catch (error: any) {
-      // console.log(error);
       toast.error(error.response?.data?.message || "Login failed!"); // Show error message
     }
   };
