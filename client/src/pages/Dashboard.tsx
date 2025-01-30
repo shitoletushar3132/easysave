@@ -1,9 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { Folder, FileImage, FileVideo, FileText } from "lucide-react"; // Added FileVideo for video file
+import { Folder } from "lucide-react";
 import SecondHeader from "./SecondHeader";
 import { useState, useEffect } from "react";
 import FullscreenViewer from "../components/FullscreenViewer";
-import { BASEURL } from "../helper/constant";
+import { useRecoilValue } from "recoil";
+import { RefreshAtom } from "../store/atomAuth";
+import { fetchFiles, fetchFolders } from "../requests/fetchFF";
+import { FileType, FolderType } from "../helper/constant";
+import { colors, Icon, renderPreview } from "../helper/fileShow";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -13,33 +17,16 @@ const Dashboard = () => {
     type: string;
   } | null>(null);
 
-  const [folders, setFolders] = useState<any[]>([]);
+  const [folders, setFolders] = useState<FolderType[]>([]);
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [files, setFiles] = useState<any[]>([]);
+  const [files, setFiles] = useState<FileType[]>([]);
+  const refresh = useRecoilValue(RefreshAtom);
 
   useEffect(() => {
-    // Fetching files from API
-    const fetchFolders = async () => {
-      const response = await fetch(`${BASEURL}/folder-name`, {
-        credentials: "include",
-      });
-      const data = await response.json();
-
-      setFolders(data);
-    };
-
-    const fetchFiles2 = async () => {
-      const response = await fetch(`${BASEURL}/content1`, {
-        credentials: "include",
-      });
-      const data = await response.json();
-      setFiles(data);
-    };
-
-    fetchFolders();
-    fetchFiles2();
-  }, []);
+    fetchFolders(setFolders);
+    fetchFiles(setFiles);
+  }, [refresh]);
 
   const handleFolderClick = (folderName: string) => {
     navigate(`/folder/${folderName}`);
@@ -64,47 +51,10 @@ const Dashboard = () => {
     }
   };
 
-  // Function to render file previews based on the file type
-  const renderPreview = (file: any) => {
-    switch (file.type.split("/")[0]) {
-      case "image":
-        return (
-          <img
-            src={file.url}
-            alt={file.name}
-            className="w-full h-full object-cover"
-          />
-        );
-      case "video":
-        return (
-          <video controls className="w-full h-full">
-            <source src={file.url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        );
-      case "document":
-        return (
-          <iframe
-            src={file.url}
-            className="h-full w-full overflow-hidden"
-            title={file.name}
-          />
-        );
-      default:
-        return (
-          <div className="w-full h-full flex justify-center items-center">
-            <FileImage size={40} className="text-gray-400" />
-            <span className="text-gray-500">File Preview</span>
-          </div>
-        );
-    }
-  };
-
   return (
     <div className="flex flex-col h-screen ">
       <SecondHeader />
 
-      {/* Folders Section */}
       <div className="p-6">
         <h2 className="text-lg font-medium text-white mb-4">Folders</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -116,7 +66,11 @@ const Dashboard = () => {
             >
               <div className="flex flex-col items-center p-4 rounded-lg bg-base-300 border border-base-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out">
                 <div className="mb-2 text-gray-400 group-hover:text-blue-500 transition-colors">
-                  <Folder size={40} />
+                  <Folder
+                    size={40}
+                    color={colors.folder}
+                    fill={colors.folder}
+                  />
                 </div>
                 <span className="text-sm font-medium text-white group-hover:text-blue-400">
                   {folder.name}
@@ -135,16 +89,16 @@ const Dashboard = () => {
           {files.map((file, index) => (
             <div
               key={index}
-              className="group relative cursor-pointer m-1"
               onClick={() => handleFileClick(file, index)}
+              className="group relative cursor-pointer m-1"
             >
               <div className="flex flex-col rounded-lg bg-base-300 border border-base-200 overflow-hidden hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out ">
                 <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
                   {renderPreview(file)} {/* Conditional rendering of preview */}
                 </div>
                 <div className="p-3">
-                  <div className="flex items-center space-x-2">
-                    <FileImage size={16} className="text-white-400" />
+                  <div className="flex items-center space-x-2 ">
+                    <Icon type={file.type} />
                     <span className="text-sm font-medium text-white truncate">
                       {file.name}
                     </span>

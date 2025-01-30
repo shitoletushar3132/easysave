@@ -18,3 +18,10 @@ export const authState = atom<ProfileData>({
     lastName: "",
   }, // default empty profile
 });
+
+export const RefreshAtom = atom({
+  key: "refresh",
+  default: {
+    refresh: false,
+  },
+});

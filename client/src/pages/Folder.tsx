@@ -1,42 +1,31 @@
 import { Link, useParams } from "react-router-dom";
-import SecondHeader from "./SecondHeader";
-import { FileImage, FileText } from "lucide-react";
-import FullscreenViewer from "../components/FullscreenViewer";
 import { useEffect, useState } from "react";
-import { BASEURL } from "../helper/constant";
+import { useRecoilValue } from "recoil";
+import { MoreVerticalIcon } from "lucide-react";
+import SecondHeader from "./SecondHeader";
+import FullscreenViewer from "../components/FullscreenViewer";
+import { Icon, renderPreview } from "../helper/fileShow";
+import { RefreshAtom } from "../store/atomAuth";
+import { fetchFolderFiles } from "../requests/fetchFF";
 
 const Folder = () => {
-  const { folderName } = useParams();
+  const { folderName = "/" } = useParams();
+  const refresh = useRecoilValue(RefreshAtom);
+
   const [files, setFiles] = useState<any[]>([]);
-  const files2 = Array.from({ length: 20 }, (_, index) => ({
-    id: index,
-    name: `Image ${index + 1}`,
-    url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s",
-    type: "image/jpg",
-  }));
-
-  const fetchFolderFiles = async () => {
-    const response = await fetch(`${BASEURL}/folder-content/${folderName}`, {
-      credentials: "include",
-    });
-    const data = await response.json();
-
-    setFiles(data);
-  };
-
-  useEffect(() => {
-    fetchFolderFiles();
-  }, []);
-
   const [selectedFile, setSelectedFile] = useState<{
     id: number;
     name: string;
     url: string;
   } | null>(null);
-
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [showMoreMenu, setShowMoreMenu] = useState<Record<number, boolean>>({});
 
-  const handleFileClick = (file: (typeof files)[0], index: number) => {
+  useEffect(() => {
+    fetchFolderFiles(setFiles, folderName);
+  }, [folderName, refresh]);
+
+  const handleFileClick = (file: any, index: number) => {
     setSelectedFile(file);
     setCurrentIndex(index);
   };
@@ -55,55 +44,52 @@ const Folder = () => {
     }
   };
 
-  // Function to render file previews based on the file type
-  const renderPreview = (file: any) => {
-    switch (file.type.split("/")[0]) {
-      case "image":
-        return (
-          <img
-            src={file.url}
-            alt={file.name}
-            className="w-full h-full object-cover"
-          />
-        );
-      case "video":
-        return (
-          <video controls className="w-full h-full">
-            <source src={file.url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        );
-      case "document":
-        return (
-          <iframe
-            src={file.url}
-            className="h-full w-full overflow-hidden"
-            title={file.name}
-          />
-        );
-      default:
-        return (
-          <div className="w-full h-full flex justify-center items-center">
-            <FileImage size={40} className="text-gray-400" />
-            <span className="text-gray-500">Click To open</span>
-          </div>
-        );
-    }
+  const toggleMenu = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    setShowMoreMenu((prev) => ({ [index]: !prev[index] }));
   };
+
+  useEffect(() => {
+    const closeMenu = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".menu-container")) {
+        setShowMoreMenu({});
+      }
+    };
+    document.addEventListener("click", closeMenu);
+    return () => document.removeEventListener("click", closeMenu);
+  }, []);
 
   return (
     <div className="flex flex-col h-screen">
       <SecondHeader />
-      <div className="p-4">
+
+      {/* Folder Header */}
+      <div className="p-4 flex justify-between items-center">
         <h1 className="font-bold text-xl">
-          <Link to={"/"} className="text-red-300">
-            {" "}
-            Home{" "}
+          <Link to="/" className="text-red-300 cursor-pointer">
+            Home
           </Link>
-          <span>/ </span>
-          {folderName}
+          <span> / {folderName}</span>
         </h1>
+        <button className="menu-container relative" title="More Options">
+          <MoreVerticalIcon
+            className="text-white"
+            onClick={(e) => toggleMenu(e, currentIndex)}
+          />
+          {showMoreMenu[currentIndex] && (
+            <ul className="absolute right-0 mt-2 bg-gray-700 p-2 shadow-md rounded-md z-10">
+              <li className="px-4 py-2 hover:bg-gray-200 hover:rounded-lg cursor-pointer">
+                Delete
+              </li>
+              <li className="px-4 py-2 hover:bg-gray-200 hover:rounded-lg cursor-pointer">
+                Share
+              </li>
+            </ul>
+          )}
+        </button>
       </div>
+
+      {/* Files Grid */}
       <div className="flex-1 p-4">
         <h2 className="text-lg font-medium text-white mb-4">Files</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 overflow-y-auto">
@@ -113,13 +99,13 @@ const Folder = () => {
               className="group relative cursor-pointer m-1"
               onClick={() => handleFileClick(file, index)}
             >
-              <div className="flex flex-col rounded-lg bg-base-300 border border-base-200 overflow-hidden hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out ">
+              <div className="flex flex-col rounded-lg bg-base-300 border border-base-200 overflow-hidden hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out">
                 <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
-                  {renderPreview(file)} {/* Conditional rendering of preview */}
+                  {renderPreview(file)}
                 </div>
                 <div className="p-3">
                   <div className="flex items-center space-x-2">
-                    <FileImage size={16} className="text-gray-400" />
+                    <Icon type={file.type} />
                     <span className="text-sm font-medium text-white truncate">
                       {file.name}
                     </span>
@@ -131,7 +117,10 @@ const Folder = () => {
           ))}
         </div>
       </div>
+
+      {/* Fullscreen Viewer */}
       <FullscreenViewer
+        //@ts-expect-error
         file={selectedFile}
         onClose={() => setSelectedFile(null)}
         onPrevious={handlePrevious}
