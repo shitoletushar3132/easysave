@@ -4,6 +4,30 @@ import { userAuth } from "../middleware/auth";
 import { BASEURL } from "../constant";
 
 const folderRoute = express.Router();
+
+folderRoute.get("/folder-name", userAuth, async (req, res) => {
+  try {
+    // @ts-expect-error
+    const userId = req.user.userId;
+    const folders = await Prisma.folder.findMany({
+      where: {
+        ownerId: userId,
+        deleted: false,
+      },
+    });
+
+    const userData = folders.map((folder, index) => ({
+      folderId: folder.folderId,
+      name: folder.name,
+      path: folder.path,
+    }));
+
+    res.json(userData);
+  } catch (err: any) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 folderRoute.get("/folder-content/:folderName", userAuth, async (req, res) => {
   try {
     //@ts-expect-error
@@ -11,7 +35,7 @@ folderRoute.get("/folder-content/:folderName", userAuth, async (req, res) => {
     const { folderName } = req.params;
 
     const folder = await Prisma.folder.findFirst({
-      where: { name: folderName, ownerId: userId },
+      where: { name: folderName, ownerId: userId, deleted: false },
     });
 
     if (!folder) {
@@ -22,13 +46,20 @@ folderRoute.get("/folder-content/:folderName", userAuth, async (req, res) => {
     }
 
     const filesUser = await Prisma.file.findMany({
-      where: { ownerId: userId, status: "upload", folderId: folder.folderId },
+      where: {
+        ownerId: userId,
+        status: "upload",
+        folderId: folder.folderId,
+        deleted: false,
+      },
     });
 
     const dataUser = filesUser.map((file) => ({
+      fileId: file.fileId,
       name: file.name,
       url: `${BASEURL}/content/${file.key}`,
       type: file.type,
+      key: file.key,
     }));
 
     res.json(dataUser);
@@ -38,23 +69,46 @@ folderRoute.get("/folder-content/:folderName", userAuth, async (req, res) => {
   }
 });
 
-folderRoute.get("/folder-name", userAuth, async (req, res) => {
+folderRoute.delete("/folder-name", userAuth, async (req, res): Promise<any> => {
   try {
-    // @ts-expect-error
+    //@ts-expect-error
     const userId = req.user.userId;
-    const folders = await Prisma.folder.findMany({
-      where: {
-        ownerId: userId,
-      },
+    const { folderId, folderName } = req.body;
+
+    // Validate input
+    if (!userId || !folderId || !folderName) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: Provide valid data" });
+    }
+
+    // Check if the file exists and is not deleted
+    const findFolder = await Prisma.folder.findFirst({
+      where: { folderId, ownerId: userId, deleted: false },
     });
 
-    const userData = folders.map((folder, index) => ({
-      id: index,
-      name: folder.name,
-    }));
+    if (!findFolder || findFolder.deleted) {
+      return res
+        .status(404)
+        .json({ message: "Folder not found or already deleted" });
+    }
 
-    res.json(userData);
+    // Soft delete the file by setting `deleted` to true
+    await Prisma.file.updateMany({
+      where: { folderId },
+      data: { deleted: true },
+    });
+
+    await Prisma.folder.update({
+      where: { folderId },
+      data: { deleted: true },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Folder deleted successfully", success: true });
   } catch (err: any) {
+    console.error("Error fetching folder content:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

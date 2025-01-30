@@ -11,11 +11,7 @@ import { colors, Icon, renderPreview } from "../helper/fileShow";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [selectedFile, setSelectedFile] = useState<{
-    name: string;
-    url: string;
-    type: string;
-  } | null>(null);
+  const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
 
   const [folders, setFolders] = useState<FolderType[]>([]);
 
@@ -28,8 +24,8 @@ const Dashboard = () => {
     fetchFiles(setFiles);
   }, [refresh]);
 
-  const handleFolderClick = (folderName: string) => {
-    navigate(`/folder/${folderName}`);
+  const handleFolderClick = (folderName: string, folderId: string) => {
+    navigate(`/folder/${folderId}/${folderName}`);
   };
 
   const handleFileClick = (file: (typeof files)[0], index: number) => {
@@ -58,27 +54,31 @@ const Dashboard = () => {
       <div className="p-6">
         <h2 className="text-lg font-medium text-white mb-4">Folders</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {folders.map((folder) => (
-            <div
-              key={folder.id}
-              onClick={() => handleFolderClick(folder.name)}
-              className="group cursor-pointer relative"
-            >
-              <div className="flex flex-col items-center p-4 rounded-lg bg-base-300 border border-base-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out">
-                <div className="mb-2 text-gray-400 group-hover:text-blue-500 transition-colors">
-                  <Folder
-                    size={40}
-                    color={colors.folder}
-                    fill={colors.folder}
-                  />
+          {folders.length > 0 ? (
+            folders.map((folder) => (
+              <div
+                key={folder.folderId}
+                onClick={() => handleFolderClick(folder.name, folder.folderId)}
+                className="group cursor-pointer relative"
+              >
+                <div className="flex flex-col items-center p-4 rounded-lg bg-base-300 border border-base-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out">
+                  <div className="mb-2 text-gray-400 group-hover:text-blue-500 transition-colors">
+                    <Folder
+                      size={40}
+                      color={colors.folder}
+                      fill={colors.folder}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-white group-hover:text-blue-400">
+                    {folder.name}
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-white group-hover:text-blue-400">
-                  {folder.name}
-                </span>
+                <div className="absolute inset-0 rounded-lg ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200" />
               </div>
-              <div className="absolute inset-0 rounded-lg ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200" />
-            </div>
-          ))}
+            ))
+          ) : (
+            <p>No Folder Found</p>
+          )}
         </div>
       </div>
 
@@ -86,28 +86,33 @@ const Dashboard = () => {
       <div className="flex-1 p-4">
         <h2 className="text-lg font-medium text-white mb-4">Files</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 overflow-y-auto">
-          {files.map((file, index) => (
-            <div
-              key={index}
-              onClick={() => handleFileClick(file, index)}
-              className="group relative cursor-pointer m-1"
-            >
-              <div className="flex flex-col rounded-lg bg-base-300 border border-base-200 overflow-hidden hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out ">
-                <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
-                  {renderPreview(file)} {/* Conditional rendering of preview */}
-                </div>
-                <div className="p-3">
-                  <div className="flex items-center space-x-2 ">
-                    <Icon type={file.type} />
-                    <span className="text-sm font-medium text-white truncate">
-                      {file.name}
-                    </span>
+          {files.length > 0 ? (
+            files.map((file, index) => (
+              <div
+                key={index}
+                onClick={() => handleFileClick(file, index)}
+                className="group relative cursor-pointer m-1"
+              >
+                <div className="flex flex-col rounded-lg bg-base-300 border border-base-200 overflow-hidden hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out ">
+                  <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+                    {renderPreview(file)}{" "}
+                    {/* Conditional rendering of preview */}
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-center space-x-2 ">
+                      <Icon type={file.type} />
+                      <span className="text-sm font-medium text-white truncate">
+                        {file.name}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <div className="absolute inset-0 rounded-lg ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200" />
               </div>
-              <div className="absolute inset-0 rounded-lg ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200" />
-            </div>
-          ))}
+            ))
+          ) : (
+            <p>No File Found</p>
+          )}
         </div>
       </div>
 

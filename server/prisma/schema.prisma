@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  userId    Int      @id @default(autoincrement())
+  userId    String   @id @default(uuid())
   email     String   @unique
   password  String
   firstName String
@@ -21,29 +21,31 @@ model User {
 }
 
 model File {
-  fileId    Int      @id @default(autoincrement())
+  fileId    String   @id @default(uuid())
   name      String
   type      String
   key       String
   size      Int
   owner     User     @relation(fields: [ownerId], references: [userId])
-  ownerId   Int
+  ownerId   String
   status    Status // The status of the file (upload, pending, or error)
-  access    Boolean // Indicates whether the file has been uploaded successfully
+  access    Boolean  @default(false) // Indicates whether the file has been uploaded successfully
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   folder    Folder?  @relation(fields: [folderId], references: [folderId]) // A file belongs to one folder (optional)
   folderId  String? // Folder ID reference (nullable)
+  deleted   Boolean  @default(false)
 }
 
 model Folder {
   folderId  String   @id @default(uuid())
   name      String
-  ownerId   Int // Foreign key to User
   path      String // Folder path in S3
   createdAt DateTime @default(now())
   user      User     @relation(fields: [ownerId], references: [userId], onDelete: Cascade)
+  ownerId   String // Foreign key to User
   files     File[] // A folder can have multiple files
+  deleted   Boolean  @default(false)
 }
 
 // Enum for file status
@@ -51,5 +53,4 @@ enum Status {
   upload
   pending
   error
-  deleted
 }

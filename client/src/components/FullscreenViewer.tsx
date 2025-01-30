@@ -11,13 +11,13 @@ import {
   MoreVerticalIcon,
 } from "lucide-react";
 import React, { useState, useCallback, useEffect } from "react";
+import { deleteFile } from "../requests/delete";
+import { FileType } from "../helper/constant";
+import { useRecoilState } from "recoil";
+import { RefreshAtom } from "../store/atomAuth";
 
 interface FileViewerProps {
-  file: {
-    name: string;
-    url: string;
-    type: string;
-  };
+  file: FileType;
   onClose: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -33,9 +33,11 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
   totalFiles,
   currentIndex,
 }) => {
+  console.log(file);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [refresh, setRefresh] = useRecoilState(RefreshAtom);
 
   const [showMoreMenu, setShowMoreMenu] = useState<Record<number, boolean>>({});
   const toggleMenu = (e: React.MouseEvent, index: number) => {
@@ -110,6 +112,14 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
     } catch (error) {
       console.error("Download failed:", error);
       alert("Failed to download file. Please try again.");
+    }
+  };
+
+  const handleDelete = async (fileId: string, key: string) => {
+    const res = await deleteFile(fileId, key);
+    if (res.success) {
+      onClose();
+      setRefresh((prev) => ({ refresh: !prev.refresh }));
     }
   };
 
@@ -248,10 +258,16 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
                 >
                   Download
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-200 hover:rounded-lg  cursor-pointer">
+                <li
+                  className="px-4 py-2 hover:bg-gray-200 hover:rounded-lg  cursor-pointer"
+                  onClick={() => handleDelete(file.fileId, file.key)}
+                >
                   Delete
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-200 hover:rounded-lg  cursor-pointer">
+                <li
+                  className="px-4 py-2 hover:bg-gray-200 hover:rounded-lg  cursor-pointer"
+                  onClick={() => alert("hllo")}
+                >
                   Share
                 </li>
               </ul>

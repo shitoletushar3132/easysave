@@ -17,7 +17,7 @@ const userAuth = async (
     }
 
     const decodedObj = JWT.verify(token, process.env.JWT_SECRET || "") as {
-      userId: number;
+      userId: string;
     };
 
     const { userId } = decodedObj;

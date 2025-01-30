@@ -3,6 +3,9 @@ import { useRecoilState } from "recoil";
 import { authState } from "../store/atomAuth";
 import { logout } from "../requests/auth";
 import { toast } from "react-toastify";
+import logo from "../assets/easySaveLogo.webp"; // Adjust the filename accordingly
+import { useEffect } from "react";
+import { shareFile } from "../requests/public";
 
 const NavBar = () => {
   const [profile, setProfile] = useRecoilState(authState);
@@ -13,27 +16,41 @@ const NavBar = () => {
     navigate("/login");
     toast.success(response.message);
   };
+
+  const handleShare = async () => {
+    await shareFile();
+  };
+
+  useEffect(() => {
+   handleShare()
+  }, []);
+
   return (
     <div className="navbar bg-base-300 shadow-lg">
-      <div className="flex-1">
-        <NavLink to={"/"} className="btn btn-ghost text-xl">
-          🧑‍💻 DEV MATCH
+      <div className="flex-1 flex items-center space-x-2">
+        <NavLink to={"/"} className="btn btn-ghost flex items-center space-x-2">
+          <span className="text-xl font-semibold tracking-wide bg-gradient-to-r from-sky-400 via-white to-red-500 text-transparent bg-clip-text">
+            EasySave
+          </span>
         </NavLink>
       </div>
-      <div className="flex-none gap-2">
-        {profile.userId && <h1> Welcome, {profile.firstName}</h1>}
 
-        <div className="dropdown dropdown-end mx-5">
+      <div className="flex-none">
+        {profile.userId && (
+          <h1 className="text-sm">
+            <span>Welcome,</span>{" "}
+            <span className="font-bold">{profile.firstName.toUpperCase()}</span>
+          </h1>
+        )}
+
+        <div className="dropdown dropdown-end mr-4">
           <div
             tabIndex={0}
             role="button"
             className="btn btn-ghost btn-circle avatar"
           >
             <div className="w-10 rounded-full">
-              <img
-                alt="Tailwind CSS Navbar component"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-              />
+              <img alt="Tailwind CSS Navbar component" src={logo} />
             </div>
           </div>
           <ul

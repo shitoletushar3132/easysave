@@ -5,9 +5,9 @@ import { userAuth } from "../middleware/auth";
 import mime from "mime-types";
 import { BASEURL } from "../constant";
 
-const getImages = express.Router();
+const fileRouter = express.Router();
 
-getImages.get(
+fileRouter.get(
   "/content/*",
   userAuth,
 
@@ -19,13 +19,13 @@ getImages.get(
       const fileName = req.path.split("/").pop() || "application/octet-stream";
 
       const mimeType = mime.lookup(fileName) || "application/octet-stream";
-      // res.setHeader("Content-Type", mimeType);
-      // res.setHeader("Cache-Control", "max-age=3600");
+      res.setHeader("Content-Type", mimeType);
+      res.setHeader("Cache-Control", "max-age=3600");
 
       const s3Key = decodeURIComponent(req.path.split("/content/")[1]);
 
       const fileRecord = await Prisma.file.findFirst({
-        where: { key: s3Key, ownerId: userId },
+        where: { key: s3Key, ownerId: userId, deleted: false },
       });
 
       if (!fileRecord) {
@@ -33,6 +33,7 @@ getImages.get(
         return;
       }
 
+      console.log("s3Key", s3Key);
       s3.getObject({
         Bucket: process.env.AWS_S3_BUCKET,
         Key: `${s3Key}`,
@@ -52,18 +53,25 @@ getImages.get(
   }
 );
 
-getImages.get("/file-lists", userAuth, async (req, res) => {
+fileRouter.get("/file-lists", userAuth, async (req, res) => {
   try {
     //@ts-expect-error
     const userId = req.user.userId;
     const filesUser = await Prisma.file.findMany({
-      where: { ownerId: userId, status: "upload", folderId: null },
+      where: {
+        ownerId: userId,
+        status: "upload",
+        folderId: null,
+        deleted: false,
+      },
     });
 
     const dataUser = filesUser.map((file) => ({
+      fileId: file.fileId,
       name: file.name,
       url: `${BASEURL}/content/${file.key}`,
       type: file.type,
+      key: file.key,
     }));
 
     res.json(dataUser);
@@ -74,5 +82,44 @@ getImages.get("/file-lists", userAuth, async (req, res) => {
   }
 });
 
+fileRouter.delete("/file", userAuth, async (req, res): Promise<any> => {
+  try {
+    //@ts-expect-error
+    const userId = req.user.userId;
+    const { fileId, key } = req.body;
 
-export default getImages;
+    // Validate input
+    if (!userId || !fileId || !key) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: Provide valid data" });
+    }
+
+    // Check if the file exists and is not deleted
+    const findFile = await Prisma.file.findFirst({
+      where: { fileId, ownerId: userId, deleted: false },
+    });
+
+    if (!findFile) {
+      return res
+        .status(404)
+        .json({ message: "File not found or already deleted" });
+    }
+
+    // Soft delete the file by setting `deleted` to true
+    await Prisma.file.update({
+      where: { fileId },
+      data: { deleted: true },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "File deleted successfully", success: true });
+  } catch (err: any) {
+    return res
+      .status(500)
+      .json({ error: "Error processing file request", message: err.message });
+  }
+});
+
+export default fileRouter;

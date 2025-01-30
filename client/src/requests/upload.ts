@@ -18,7 +18,7 @@ const uploadImage = async (
         fileName: file.name,
         fileType: categorizeFileType(file.type),
         fileSize: file.size,
-        folderName: location.pathname.split("/")[2],
+        folderName: location.pathname.split("/")[3],
       }),
     });
 

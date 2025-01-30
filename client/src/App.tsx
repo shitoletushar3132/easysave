@@ -24,7 +24,7 @@ function App() {
               {/* Default child route */}
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<Signup />} />
-              <Route path="folder/:folderName" element={<Folder />} />
+              <Route path="folder/:folderId/:folderName" element={<Folder />} />
               <Route path="test" element={<Test />} />
             </Route>
           </Routes>
