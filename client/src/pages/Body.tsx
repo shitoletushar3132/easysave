@@ -37,11 +37,12 @@ const Body = () => {
   }, []); // Empty dependency array ensures this runs only once on mount
 
   // Redirect if not authenticated
-  // useEffect(() => {
-  //   if (!loading && !profile.userId) {
-  //     navigate("/login");
-  //   }
-  // }, [profile.userId, loading, navigate]);
+  useEffect(() => {
+    const currentPath = window.location.pathname; // Get the current route
+    if (!loading && !profile.userId && currentPath !== "/signup") {
+      navigate("/login");
+    }
+  }, [profile.userId, loading, navigate]);
 
   return (
     <div>

@@ -16,15 +16,16 @@ const Dashboard = () => {
   const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
 
   const [folders, setFolders] = useState<FolderType[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [fileLoading, setFileLoading] = useState(false);
+  const [folderLoading, setFolderLoading] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [files, setFiles] = useState<FileType[]>([]);
   const refresh = useRecoilValue(RefreshAtom);
 
   useEffect(() => {
-    fetchFolders(setFolders, setLoading);
-    fetchFiles(setFiles, setLoading);
+    fetchFolders(setFolders, setFolderLoading);
+    fetchFiles(setFiles, setFileLoading);
   }, [refresh]);
 
   useEffect(() => {
@@ -60,11 +61,11 @@ const Dashboard = () => {
 
       <div className="p-6">
         <h2 className="text-lg font-medium text-white mb-4">Folders</h2>
-        {loading ? (
+        {folderLoading ? (
           <Loader />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {folders.length > 0 && !loading ? (
+            {folders.length > 0 && !folderLoading ? (
               folders.map((folder) => (
                 <div
                   key={folder.folderId}
@@ -98,11 +99,11 @@ const Dashboard = () => {
       {/* Files Section */}
       <div className="flex-1 p-4">
         <h2 className="text-lg font-medium text-white mb-4">Files</h2>
-        {loading ? (
+        {fileLoading ? (
           <Loader />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 overflow-y-auto">
-            {files.length > 0 && !loading ? (
+            {files.length > 0 && !fileLoading ? (
               files.map((file, index) => (
                 <div
                   key={index}
