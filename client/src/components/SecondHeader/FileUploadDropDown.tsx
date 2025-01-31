@@ -38,14 +38,13 @@ const FileUploadDropdown: React.FC<FileUploadDropdownProps> = ({
 
   return (
     <div ref={dropdownRef} className="relative dropdown">
-      <div className="flex flex-col items-center space-y-2">
+      <div className="flex flex-col items-center  space-y-2">
         <button
           className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         >
           Upload
         </button>
-        <div className="text-sm text-gray-600 truncate max-w-xs">{status}</div>
       </div>
 
       {isDropdownOpen && (

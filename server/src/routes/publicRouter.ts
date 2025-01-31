@@ -70,6 +70,7 @@ publicRouter.get("/share/files", userAuth, async (req, res): Promise<any> => {
       fileId: file.fileId,
       name: file.name,
       url: `${PUBLICURL}/transfer/file/${userId}/${file.key}`,
+      date: new Date(file.updatedAt).toISOString().split("T")[0],
       type: file.type,
       key: file.key,
     }));

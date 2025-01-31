@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import FileUploadDropdown from "./FileUploadDropDown";
 import FolderCreationModal from "./FolderCreationModal";
-import SearchBar from "./SearchBar";
+import SearchBar from "../search/SearchBar";
 import { handleFolderCreate, uploadFiles } from "../../requests/upload";
 import { useSetRecoilState } from "recoil";
 import { RefreshAtom } from "../../store/atomAuth";
@@ -65,6 +65,12 @@ const SecondHeader = () => {
           status={status}
         />
       </div>
+
+      {status !== "" && (
+        <p className="text-sm text-gray-600 truncate flex justify-end">
+          {status}
+        </p>
+      )}
 
       <FolderCreationModal
         showFolderModal={showFolderModal}

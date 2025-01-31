@@ -9,6 +9,7 @@ import { fetchFiles, fetchFolders } from "../requests/fetchFF";
 import { FileType, FolderType } from "../helper/constant";
 import { colors, Icon, renderPreview } from "../helper/fileShow";
 import Loader from "../components/Loader";
+import formatDate from "../helper/formatDate";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -110,15 +111,16 @@ const Dashboard = () => {
                 >
                   <div className="flex flex-col rounded-lg bg-base-300 border border-base-200 overflow-hidden hover:bg-gray-50 hover:border-blue-200 transition-all duration-200 ease-in-out ">
                     <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
-                      {renderPreview(file)}{" "}
+                      {renderPreview(file)}
                       {/* Conditional rendering of preview */}
                     </div>
                     <div className="p-3">
-                      <div className="flex items-center space-x-2 ">
+                      <div className="flex items-center space-x-2 justify-between">
                         <Icon type={file.type} />
-                        <span className="text-sm font-medium text-white truncate">
+                        <span className="text-sm font-medium text-white truncate w-20">
                           {file.name}
                         </span>
+                        <span className="text-xs">{formatDate(file.date)}</span>
                       </div>
                     </div>
                   </div>

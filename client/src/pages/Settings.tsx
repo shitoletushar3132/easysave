@@ -13,6 +13,7 @@ const Settings = () => {
       url: string;
       type: string;
       key: string;
+      date: string;
     }[]
   >([]);
   const [loading, setLoading] = useState(true);
@@ -114,6 +115,11 @@ const Settings = () => {
                     </th>
                     <th scope="col" className="py-4 px-6 text-right">
                       <span className="text-xs font-semibold text-base-content/70 uppercase tracking-wider">
+                        Date
+                      </span>
+                    </th>
+                    <th scope="col" className="py-4 px-6 text-right">
+                      <span className="text-xs font-semibold text-base-content/70 uppercase tracking-wider">
                         Actions
                       </span>
                     </th>
@@ -161,6 +167,7 @@ const Settings = () => {
                             </a>
                           </div>
                         </td>
+                        <td>{file.date}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <button
                             onClick={() => toggleAccess(file.fileId, file.key)}

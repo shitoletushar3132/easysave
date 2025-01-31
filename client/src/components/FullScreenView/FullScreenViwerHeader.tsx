@@ -61,56 +61,57 @@ const FullScreenViwerHeader: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-b from-black/80 to-black/40">
+    <div className="flex items-center justify-between px-4 py-4 bg-gradient-to-b from-black/80 to-black/40 z-50">
       <h3 className="text-white text-lg font-medium truncate max-w-[50%]">
         {fileName}
       </h3>
+
       <div className="flex items-center space-x-2">
         <button
           onClick={onZoomIn}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
+          className="p-1 md:p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
           title="Zoom In (Plus Key)"
         >
-          <ZoomIn className="w-5 h-5 text-white" />
+          <ZoomIn className=" text-white w-4 h-4 md:w-5 md:h-5" />
         </button>
         <button
           onClick={onZoomOut}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
+          className="p-1 md:p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
           title="Zoom Out (Minus Key)"
         >
-          <ZoomOut className="w-5 h-5 text-white" />
+          <ZoomOut className=" w-4 h-4 md:w-5 md:h-5 text-white" />
         </button>
         <button
           onClick={onRotate}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
+          className="p-1 md:p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
           title="Rotate (R Key)"
         >
-          <RotateCw className="w-5 h-5 text-white" />
+          <RotateCw className=" w-4 h-4 md:w-5 md:h-5 text-white" />
         </button>
         <div className="w-px h-6 bg-white/20 mx-2" />
         <button
           onClick={() => handleDownload(file)}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
+          className="p-1 md:p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
           title="Download"
         >
-          <Download className="w-5 h-5 text-white" />
+          <Download className=" w-4 h-4 md:w-5 md:h-5 text-white" />
         </button>
         <button
           onClick={onToggleFullscreen}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
+          className="p-1 md:p-2 rounded-lg hover:bg-white/10 transition-colors tooltip"
           title="Toggle Fullscreen"
         >
           {isFullscreen ? (
-            <Minimize2 className="w-5 h-5 text-white" />
+            <Minimize2 className=" w-4 h-4 md:w-5 md:h-5 text-white" />
           ) : (
-            <Maximize2 className="w-5 h-5 text-white" />
+            <Maximize2 className=" w-4 h-4 md:w-5 md:h-5 text-white" />
           )}
         </button>
 
         {/* More Options Dropdown */}
         <div className="relative" ref={dropdownRef}>
-          <button className="p-2" onClick={toggleMenu}>
-            <MoreVerticalIcon className="w-5 h-5 text-white" />
+          <button className="p-1 md:p-2" onClick={toggleMenu}>
+            <MoreVerticalIcon className=" w-4 h-4 md:w-5 md:h-5 text-white" />
           </button>
           {showMoreMenu && (
             <ul className="absolute right-0 mt-2 bg-gray-700 p-2 shadow-md rounded-md z-10">

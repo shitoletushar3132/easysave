@@ -15,7 +15,7 @@ interface FileViewerProps {
   onClose: () => void;
   onPrevious: () => void;
   onNext: () => void;
-  totalFiles1: number;
+  totalFiles: number;
   currentIndex: number;
 }
 
@@ -24,9 +24,10 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
   onClose,
   onPrevious,
   onNext,
-  totalFiles1,
+  totalFiles,
   currentIndex,
 }) => {
+  console.log(totalFiles);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -34,7 +35,6 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
   const setRefresh = useSetRecoilState(RefreshAtom);
 
   const memoizedFile = useMemo(() => file, [file]);
-  const totalFiles = useMemo(() => totalFiles1, [totalFiles1]);
   const [link, setLink] = useState("");
 
   const handleZoomIn = useCallback(

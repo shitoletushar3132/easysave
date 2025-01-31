@@ -9,6 +9,7 @@ const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Folder = lazy(() => import("./pages/Folder"));
 const Setting = lazy(() => import("./pages/Settings"));
+const SearchPage = lazy(() => import("./components/search/SearchPage"));
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Route path="signup" element={<Signup />} />
               <Route path="folder/:folderId/:folderName" element={<Folder />} />
               <Route path="settings" element={<Setting />} />
+              <Route path="search" element={<SearchPage />} />
             </Route>
           </Routes>
         </Suspense>

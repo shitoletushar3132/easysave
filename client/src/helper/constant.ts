@@ -11,5 +11,6 @@ export type FileType = {
   fileId: string;
   name: string;
   url: string;
+  date: string;
   type: "image" | "video" | "document" | "audio" | "other";
 };

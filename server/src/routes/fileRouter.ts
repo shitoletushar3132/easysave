@@ -71,6 +71,8 @@ fileRouter.get("/file-lists", userAuth, async (req, res) => {
       url: `${BASEURL}/content/${file.key}`,
       type: file.type,
       key: file.key,
+      date: new Date(file.createdAt).toISOString().split("T")[0],
+      folderId: file.folderId,
     }));
 
     res.json(dataUser);
@@ -118,6 +120,44 @@ fileRouter.delete("/file", userAuth, async (req, res): Promise<any> => {
     return res
       .status(500)
       .json({ error: "Error processing file request", message: err.message });
+  }
+});
+
+fileRouter.get("/search/:value", userAuth, async (req, res): Promise<any> => {
+  try {
+    //@ts-expect-error
+    const userId = req.user.userId;
+    const { value } = req.params;
+
+    const files = await Prisma.file.findMany({
+      where: {
+        ownerId: userId,
+        status: "upload",
+        deleted: false,
+        OR: [
+          {
+            name: { contains: value, mode: "insensitive" },
+          },
+          { type: { contains: value, mode: "insensitive" } },
+        ],
+      },
+    });
+
+    const dataUser = files.map((file) => ({
+      fileId: file.fileId,
+      name: file.name,
+      url: `${BASEURL}/content/${file.key}`,
+      type: file.type,
+      key: file.key,
+      date: new Date(file.createdAt).toISOString().split("T")[0],
+      folderId: file.folderId,
+    }));
+
+    return res.status(200).json({ success: true, dataUser });
+  } catch (err: any) {
+    return res
+      .status(500)
+      .json({ error: "Error In Searching File", message: err.message });
   }
 });
 

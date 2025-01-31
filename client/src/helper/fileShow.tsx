@@ -6,6 +6,8 @@ import {
   FileVideo,
   ImageIcon,
   Music,
+  Play,
+  PlayIcon,
   Video,
 } from "lucide-react";
 
@@ -24,10 +26,9 @@ const renderPreview = (file: { name: string; url: string; type: string }) => {
 
     case "video":
       return (
-        <video controls className="w-full h-full">
-          <source src={file.url} type={file.type} />
-          Your browser does not support the video tag.
-        </video>
+        <div className="w-full h-full flex justify-center items-center">
+          <Play color="black" size={30} />
+        </div>
       );
 
     case "audio":
