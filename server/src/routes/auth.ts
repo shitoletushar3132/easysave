@@ -58,7 +58,7 @@ authRouter.post(
         .cookie("token", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          sameSite: "none",
         })
         .status(201)
         .json({ message: "User created successfully", user: sendData });
@@ -105,7 +105,7 @@ authRouter.post(
         .cookie("token", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          sameSite: "none",
           maxAge: 3600000,
         })
         .json({

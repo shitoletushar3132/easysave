@@ -7,7 +7,6 @@ import {
   ImageIcon,
   Music,
   Play,
-  PlayIcon,
   Video,
 } from "lucide-react";
 

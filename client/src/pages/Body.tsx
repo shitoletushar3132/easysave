@@ -37,11 +37,11 @@ const Body = () => {
   }, []); // Empty dependency array ensures this runs only once on mount
 
   // Redirect if not authenticated
-  useEffect(() => {
-    if (!loading && !profile.userId) {
-      navigate("/login");
-    }
-  }, [profile.userId, loading, navigate]);
+  // useEffect(() => {
+  //   if (!loading && !profile.userId) {
+  //     navigate("/login");
+  //   }
+  // }, [profile.userId, loading, navigate]);
 
   return (
     <div>
