@@ -43,8 +43,7 @@ const Settings = () => {
 
   const toggleAccess = async (fileId: string, key: string) => {
     try {
-      const resp = await updateAccessiblity(fileId, key, setRefresh);
-      console.log(resp);
+      await updateAccessiblity(fileId, key, setRefresh);
     } catch (error) {
       console.log(error);
     }

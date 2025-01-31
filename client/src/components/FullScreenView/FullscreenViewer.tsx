@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, memo, useMemo } from "react";
+import React, { useState, useCallback, useEffect, memo } from "react";
 import { deleteFile } from "../../requests/delete";
 import { FileType } from "../../helper/constant";
 import { useSetRecoilState } from "recoil";
@@ -27,14 +27,12 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
   totalFiles,
   currentIndex,
 }) => {
-  console.log(totalFiles);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showShareMessage, setShowShareMessage] = useState(false);
   const setRefresh = useSetRecoilState(RefreshAtom);
 
-  const memoizedFile = useMemo(() => file, [file]);
   const [link, setLink] = useState("");
 
   const handleZoomIn = useCallback(
@@ -49,6 +47,7 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
     () => setRotation((prev) => (prev + 90) % 360),
     []
   );
+
 
   useEffect(() => {
     if (file) {
@@ -106,14 +105,16 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
     setLink(resp.shareLink);
   }, []);
 
+  useEffect(() => {}, [file,currentIndex]);
+
   if (!file) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
       {/* Header */}
       <FullScreenViwerHeader
-        file={memoizedFile}
-        fileName={memoizedFile.name}
+        file={file}
+        fileName={file.name}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onRotate={handleRotate}
@@ -133,7 +134,7 @@ const FullscreenViewer: React.FC<FileViewerProps> = ({
           totalFiles={totalFiles}
         />
         <div className="max-h-full max-w-full p-4 select-none">
-          {renderFile(memoizedFile, zoom, rotation)}
+          {renderFile(file, zoom, rotation)}
         </div>
       </div>
 

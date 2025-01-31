@@ -13,7 +13,6 @@ const FullScreenViewerNavigator: React.FC<NavigationButtonsProps> = ({
   currentIndex,
   totalFiles,
 }) => {
-  console.log(totalFiles);
   return (
     <>
       {currentIndex > 0 && (

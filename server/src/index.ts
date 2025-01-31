@@ -33,8 +33,10 @@ app.use("/", UploadRouter);
 app.use("/", folderRoute);
 app.use("/", publicRouter);
 
+let i = 0;
+
 app.get("/", (req: Request, res: Response) => {
-  res.send("hello hool");
+  res.send(`hello hool ${++i}`);
 });
 
 const PORT = process.env.PORT || 3000;

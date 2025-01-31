@@ -21,8 +21,6 @@ UploadRouter.post(
         return res.status(400).json({ error: "Files array is required" });
       }
 
-      console.log(files);
-
       let folderId: string | null = null;
 
       if (folderName) {

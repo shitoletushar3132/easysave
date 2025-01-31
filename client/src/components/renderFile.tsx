@@ -23,7 +23,7 @@ const renderFile = (file: FileType, zoom: number, rotation: number) => {
       );
     case "video":
       return (
-        <video controls className={commonStyles}>
+        <video key={file.url} controls className={commonStyles}>
           <source src={file.url} type="video/mp4" />
           Your browser does not support the video tag.
         </video>

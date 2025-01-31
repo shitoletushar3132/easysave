@@ -129,8 +129,6 @@ publicRouter.get(
   "/transfer/file/:ownerId/*",
   async (req, res): Promise<any> => {
     try {
-      console.log("hit");
-
       const { ownerId } = req.params;
 
       //@ts-expect-error
