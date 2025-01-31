@@ -2,81 +2,71 @@ import { toast } from "react-toastify";
 import { BASEURL } from "../helper/constant";
 import categorizeFileType from "../helper/fileType";
 
-const uploadImage = async (
-  file: File,
+const uploadFiles = async (
+  files: File[],
   setStatus: React.Dispatch<React.SetStateAction<string>>,
   setRefresh: React.Dispatch<React.SetStateAction<{ refresh: boolean }>>
 ): Promise<void> => {
   try {
-    const response = await fetch(`${BASEURL}/upload`, {
+    const folderName = location.pathname.split("/")[3]; // Get folder from path
+
+    // Step 1: Request pre-signed URLs for all files at once
+    const response = await fetch(`${BASEURL}/upload-multiple`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
       body: JSON.stringify({
-        fileName: file.name,
-        fileType: categorizeFileType(file.type),
-        fileSize: file.size,
-        folderName: location.pathname.split("/")[3],
+        files: files.map((file) => ({
+          fileName: file.name,
+          fileType: categorizeFileType(file.type),
+          fileSize: file.size,
+        })),
+        folderName,
       }),
     });
 
-    if (!response.ok) {
-      setStatus("Failed to Upload Try again");
-      toast("Failed to Upload Try again");
-      return;
-    }
+    if (!response.ok) throw new Error("Failed to get pre-signed URLs");
 
-    const { url, fileId }: { url: string; fileId: string } =
-      await response.json();
+    const { uploadedFiles } = await response.json();
 
-    const uploadResponse = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "Content-Type": file.type,
-      },
-      body: file,
-    });
+    // Step 2: Upload files to the respective pre-signed URLs
+    const uploadPromises = uploadedFiles.map(
+      async ({ uploadUrl, fileId, fileName }: any) => {
+        const file = files.find((f) => f.name === fileName);
+        if (!file) throw new Error(`File not found for ${fileName}`);
 
-    if (uploadResponse.ok) {
-      const notifyResponse = await fetch(`${BASEURL}/file-uploaded`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fileId,
-          status: "upload",
-        }),
-        credentials: "include",
-      });
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
 
-      if (notifyResponse.ok) {
-        setStatus("File uploaded successfully!");
-        toast.success("File Upload Successfully");
-        setRefresh((prev) => ({ refresh: !prev.refresh }));
-        setStatus("");
-      } else {
-        throw new Error("Try Again");
+        if (!uploadResponse.ok)
+          throw new Error(`Upload failed for ${fileName}`);
+
+        // Step 3: Notify backend about the successful upload
+        await fetch(`${BASEURL}/file-uploaded`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileId, status: "upload" }),
+          credentials: "include",
+        });
+
+        return fileName;
       }
-    } else {
-      await fetch("/file-uploaded", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fileId,
-          status: "error",
-        }),
-      });
-      setStatus("Upload failed.");
-      toast.info("Fail to Upload File Try Again");
-      setStatus("");
-    }
+    );
+
+    // Wait for all uploads to complete
+    const uploadedFilesList = await Promise.all(uploadPromises);
+
+    setStatus(`${uploadedFilesList.length} files uploaded successfully!`);
+    toast.success("All Files Uploaded Successfully");
+    setRefresh((prev) => ({ refresh: !prev.refresh }));
+    setStatus("");
   } catch (error) {
-    console.error("Error uploading image:", error);
+    console.error("Error uploading files:", error);
     setStatus("An error occurred during upload.");
     toast.error("An error occurred during upload.");
   }
@@ -130,4 +120,4 @@ const handleFolderCreate = async (
   }
 };
 
-export { uploadImage, handleFolderCreate };
+export { uploadFiles, handleFolderCreate };

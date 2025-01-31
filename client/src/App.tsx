@@ -2,13 +2,13 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { lazy, Suspense } from "react";
 import Body from "./pages/Body"; // Import the Body component
-import Test from "./components/Test";
 import { RecoilRoot } from "recoil";
 
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Folder = lazy(() => import("./pages/Folder"));
+const Setting = lazy(() => import("./pages/Settings"));
 
 function App() {
   return (
@@ -25,7 +25,7 @@ function App() {
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<Signup />} />
               <Route path="folder/:folderId/:folderName" element={<Folder />} />
-              <Route path="test" element={<Test />} />
+              <Route path="settings" element={<Setting />} />
             </Route>
           </Routes>
         </Suspense>

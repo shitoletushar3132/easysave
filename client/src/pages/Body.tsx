@@ -4,33 +4,56 @@ import { toast, ToastContainer } from "react-toastify";
 import { useRecoilState } from "recoil";
 import { authState } from "../store/atomAuth";
 import { fetchUserData } from "../requests/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Loader from "../components/Loader";
 
 const Body = () => {
   const [profile, setProfile] = useRecoilState(authState);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true); // Start with loading true
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const userData = await fetchUserData();
+      if (!userData?.user?.userId) throw new Error("Invalid user data");
       setProfile(userData.user);
     } catch (error: any) {
-      toast.error(error.response.data);
+      console.error("Error fetching user data:", error);
+      setProfile({ firstName: "", lastName: "", userId: "", email: "" });
+
+      const errorMessage =
+        error.response?.data || "Something went wrong. Please try again.";
+      toast.error(errorMessage);
+
       navigate("/login");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!profile.userId) {
-      fetchData();
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!loading && !profile.userId) {
+      navigate("/login");
     }
-  }, [setProfile]);
+  }, [profile.userId, loading, navigate]);
 
   return (
     <div>
       <ToastContainer />
       <NavBar />
-      <Outlet />
+      {loading ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <Loader />
+        </div>
+      ) : (
+        <Outlet />
+      )}
     </div>
   );
 };

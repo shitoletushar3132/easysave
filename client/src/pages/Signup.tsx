@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { InputBoxSignUp } from "../types";
 import { toast } from "react-toastify";
@@ -37,6 +37,10 @@ const Signup = () => {
       toast.error(error.response?.data || "Login failed!"); // Show error message
     }
   };
+
+  useEffect(() => {
+    document.title = "Sign up";
+  }, []);
 
   return (
     <div className="w-full max-w-md mx-auto mt-16 p-8 shadow-lg rounded-xl bg-base-300">

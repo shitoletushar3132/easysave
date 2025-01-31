@@ -1,5 +1,4 @@
 const categorizeFileType = (fileType: string): string => {
-  console.log(fileType);
   const imageTypes = [
     "image/jpeg",
     "image/png",
@@ -7,7 +6,6 @@ const categorizeFileType = (fileType: string): string => {
     "image/gif",
     "image/webp",
   ];
-  console.log(fileType);
   const audioTypes = ["audio/mp3", "audio/wav", "audio/ogg", "audio/mpeg"];
   const videoTypes = ["video/mp4", "video/webm", "video/ogg"];
   const documentTypes = ["application/pdf"];

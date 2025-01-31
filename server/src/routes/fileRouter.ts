@@ -33,7 +33,6 @@ fileRouter.get(
         return;
       }
 
-      console.log("s3Key", s3Key);
       s3.getObject({
         Bucket: process.env.AWS_S3_BUCKET,
         Key: `${s3Key}`,

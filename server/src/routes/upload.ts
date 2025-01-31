@@ -6,27 +6,26 @@ import Prisma from "../PrismaInit";
 const UploadRouter = express.Router();
 
 // Upload File
+
+// Upload Multiple Files
 UploadRouter.post(
-  "/upload",
+  "/upload-multiple",
   userAuth,
   async (req: Request, res: Response): Promise<any> => {
     try {
-      const { fileName, fileType, fileSize, folderName } = req.body;
+      const { files, folderName } = req.body; // Expecting an array of files
       //@ts-expect-error
       const userId = req.user?.userId; // Ensure userId is available
 
-      if (!fileName || !fileType || !fileSize) {
-        return res
-          .status(400)
-          .json({ error: "fileName, fileType, and fileSize are required" });
+      if (!files || !Array.isArray(files) || files.length === 0) {
+        return res.status(400).json({ error: "Files array is required" });
       }
 
-      let s3Key;
+      console.log(files);
+
       let folderId: string | null = null;
 
-      if (folderName !== "" && folderName !== undefined) {
-        s3Key = `${userId}/${folderName}/${fileName}`;
-
+      if (folderName) {
         // Check if the folder already exists
         let existingFolder = await Prisma.folder.findFirst({
           where: { name: folderName, ownerId: userId },
@@ -42,41 +41,66 @@ UploadRouter.post(
             },
           });
         }
-
-        folderId = existingFolder.folderId; // Store folder ID
-      } else {
-        s3Key = `${userId}/${fileName}`;
+        folderId = existingFolder.folderId;
       }
 
-      // Store metadata in the database
-      const newFile = await Prisma.file.create({
-        data: {
-          name: fileName,
-          type: fileType,
-          key: s3Key,
-          size: fileSize,
-          ownerId: userId,
-          access: false,
-          status: "pending",
-          folderId, // Link file to folder if folder exists
-        },
-      });
+      // Generate pre-signed URLs for each file
+      const uploadedFiles = await Promise.all(
+        files.map(
+          async (file: {
+            fileName: string;
+            fileType: string;
+            fileSize: number;
+          }) => {
+            const { fileName, fileType, fileSize } = file;
 
-      // Generate Pre-Signed URL
-      const params = {
-        Bucket: process.env.AWS_S3_BUCKET,
-        Key: s3Key,
-        Expires: 60,
-        ContentType: fileType,
-      };
+            if (!fileName || !fileType || !fileSize) {
+              throw new Error("fileName, fileType, and fileSize are required");
+            }
 
-      const url = await s3.getSignedUrlPromise("putObject", params);
+            const s3Key = folderName
+              ? `${userId}/${folderName}/${fileName}`
+              : `${userId}/${fileName}`;
 
-      res.status(200).json({ url, fileId: newFile.fileId, filePath: s3Key });
+            // Store file metadata in the database
+            const newFile = await Prisma.file.create({
+              data: {
+                name: fileName,
+                type: fileType,
+                key: s3Key,
+                size: fileSize,
+                ownerId: userId,
+                access: false,
+                status: "pending",
+                folderId,
+              },
+            });
+
+            // Generate pre-signed URL
+            const params = {
+              Bucket: process.env.AWS_S3_BUCKET,
+              Key: s3Key,
+              Expires: 60,
+              ContentType: fileType,
+            };
+
+            const uploadUrl = await s3.getSignedUrlPromise("putObject", params);
+
+            return {
+              fileId: newFile.fileId,
+              fileName,
+              uploadUrl,
+              filePath: s3Key,
+            };
+          }
+        )
+      );
+
+      res.status(200).json({ uploadedFiles });
     } catch (err: any) {
-      console.error("Error generating pre-signed URL:", err);
+      console.error("Error generating pre-signed URLs:", err);
       res.status(500).json({
-        error: "Failed to generate pre-signed URL",
+        error: "Failed to generate pre-signed URLs",
         details: err.message,
       });
     }
@@ -157,8 +181,5 @@ UploadRouter.post(
     }
   }
 );
-
-
-
 
 export default UploadRouter;

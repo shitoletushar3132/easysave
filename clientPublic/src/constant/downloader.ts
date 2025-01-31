@@ -1,9 +1,15 @@
 import axios from "axios";
 
-export const handleDownload = async (file: { url: string; name: string }) => {
+export const handleDownload = async ({
+  url,
+  name,
+}: {
+  url: string;
+  name: string;
+}) => {
   try {
     // Make the request using axios
-    const response = await axios.get(file.url, {
+    const response = await axios.get(url, {
       responseType: "blob", // Handle response as a binary blob
       withCredentials: true, // Send credentials (cookies, etc.)
     });
@@ -20,7 +26,7 @@ export const handleDownload = async (file: { url: string; name: string }) => {
     // Create a link element to trigger the download
     const link = document.createElement("a");
     link.href = blobUrl;
-    link.download = file.name || "download.pdf"; // Set default name as .pdf if no name is provided
+    link.download = name || "download.pdf"; // Set default name as .pdf if no name is provided
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
