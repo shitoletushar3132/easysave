@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import Body from "./pages/Body"; // Import the Body component
 import { RecoilRoot } from "recoil";
 
@@ -11,6 +11,9 @@ const Folder = lazy(() => import("./pages/Folder"));
 const Setting = lazy(() => import("./pages/Settings"));
 
 function App() {
+  useEffect(() => {
+    document.documentElement.classList.add("dark"); // Apply dark mode permanently
+  }, []);
   return (
     <RecoilRoot>
       <BrowserRouter basename="/">

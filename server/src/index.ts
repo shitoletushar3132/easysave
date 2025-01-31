@@ -19,6 +19,7 @@ app.use(
       "http://localhost:5174",
       "https://easysave.public.tusharshitole.site",
       "https://easysave.tusharshitole.site",
+      "https://tusharshitole.site",
     ],
     credentials: true,
   })
