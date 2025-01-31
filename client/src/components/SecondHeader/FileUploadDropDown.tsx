@@ -11,7 +11,6 @@ const FileUploadDropdown: React.FC<FileUploadDropdownProps> = ({
   onNewFileClick,
   onNewFolderClick,
   showFolderCreation,
-  status,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
