@@ -1,4 +1,4 @@
-export const BASEURL: string = "http://localhost:3000";
+export const BASEURL: string = "https://easysave-main.onrender.com";
 
 export type FolderType = {
   folderId: string;

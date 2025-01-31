@@ -1,2 +1,2 @@
-export const BASEURL = `http://localhost:3000/transfer/file`;
+export const BASEURL = `https://easysave-main.onrender.com/transfer/file`;
 export const MAINURL = "http://localhost:5173";
