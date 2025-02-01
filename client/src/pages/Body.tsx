@@ -7,12 +7,14 @@ import { fetchUserData } from "../requests/auth";
 import { useEffect, useState } from "react";
 import Loader from "../components/Loader";
 
+let fetchData = () => {};
+
 const Body = () => {
   const [profile, setProfile] = useRecoilState(authState);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true); // Start with loading true
 
-  const fetchData = async () => {
+  fetchData = async () => {
     setLoading(true);
     try {
       const userData = await fetchUserData();
@@ -60,3 +62,4 @@ const Body = () => {
 };
 
 export default Body;
+export { fetchData };

@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import { BASEURL } from "../helper/constant";
 import categorizeFileType from "../helper/fileType";
+import { fetchData } from "../pages/Body";
 
 const uploadFiles = async (
   files: File[],
@@ -9,7 +10,6 @@ const uploadFiles = async (
 ): Promise<void> => {
   try {
     const folderName = location.pathname.split("/")[3]; // Get folder from path
-
     // Step 1: Request pre-signed URLs for all files at once
     const response = await fetch(`${BASEURL}/upload-multiple`, {
       method: "POST",
@@ -66,6 +66,7 @@ const uploadFiles = async (
     setRefresh((prev) => ({ refresh: !prev.refresh }));
     setStatus("");
   } catch (error) {
+    fetchData();
     console.error("Error uploading files:", error);
     setStatus("An error occurred during upload.");
     toast.error("An error occurred during upload.");
@@ -110,6 +111,7 @@ const handleFolderCreate = async (
       setRefresh((prev) => ({ refresh: !prev.refresh }));
       setStatus("");
     } catch (error) {
+      fetchData();
       console.error("Error uploading image:", error);
       setStatus("An error occurred during Folder creation.");
       toast.error("An error occurred during Folder creation.");

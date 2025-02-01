@@ -1,6 +1,7 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import { BASEURL } from "../helper/constant";
+import { fetchData } from "../pages/Body";
 
 const deleteFile = async (fileId: string, key: string) => {
   try {
@@ -13,6 +14,7 @@ const deleteFile = async (fileId: string, key: string) => {
     toast.success(response.data.message || "File deleted successfully");
     return response.data;
   } catch (error: any) {
+    fetchData();
     const errorMessage = error.response?.data?.message || error.message;
     toast.error(`Error deleting file: ${errorMessage}`);
   }
@@ -29,6 +31,7 @@ const deleteFolder = async (folderId: string, folderName: string) => {
     toast.success(response.data.message || "Folder deleted successfully");
     return response.data;
   } catch (error: any) {
+    fetchData();
     const errorMessage = error.response?.data?.message || error.message;
     toast.error(`Error deleting Folder: ${errorMessage}`);
   }

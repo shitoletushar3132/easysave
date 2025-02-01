@@ -1,6 +1,7 @@
 import axios from "axios";
 import { BASEURL } from "../helper/constant";
 import { toast } from "react-toastify";
+import { fetchData } from "../pages/Body";
 
 const shareFile = async (fileId: string, key: string) => {
   try {
@@ -52,6 +53,7 @@ const updateAccessiblity = async (
     setRefresh((prev) => ({ refresh: !prev.refresh }));
     return response.data;
   } catch (error: any) {
+    fetchData();
     console.error("Error sharing file:", error.response?.data || error.message);
   }
 };
